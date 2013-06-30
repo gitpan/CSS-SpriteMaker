@@ -1,4 +1,7 @@
 ^MYMETA.yml$
 ^\.
 ^_build
+^blib
 ^MYMETA\.json$
+^ignore.txt$
+^MANIFEST.bak$
