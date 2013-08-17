@@ -1,7 +1,7 @@
 # This Makefile is for the CSS::SpriteMaker extension to perl.
 #
 # It was generated automatically by MakeMaker version
-# 6.57_05 (Revision: 65705) from the contents of
+# 6.62 (Revision: 66200) from the contents of
 # Makefile.PL. Don't edit this file, edit Makefile.PL instead.
 #
 #       ANY CHANGES MADE HERE WILL BE LOST!
@@ -12,11 +12,12 @@
 #   MakeMaker Parameters:
 
 #     BUILD_REQUIRES => {  }
-#     EXE_FILES => [q[bin/makesprite]]
+#     CONFIGURE_REQUIRES => {  }
+#     EXE_FILES => []
 #     INSTALLDIRS => q[site]
 #     NAME => q[CSS::SpriteMaker]
 #     PL_FILES => {  }
-#     PREREQ_PM => { Config::Simple=>q[0], File::Spec=>q[0], File::Touch=>q[0], Test::Pod=>q[0], File::Find=>q[0], File::Path=>q[0], Getopt::Long=>q[0], File::Find::Rule=>q[0], Module::Pluggable=>q[0], Test::Pod::Coverage=>q[0], Test::File=>q[1.33], Image::Magick=>q[0], Test::More=>q[0], File::Temp=>q[0], File::Basename=>q[0], Cwd=>q[0], Test::CheckManifest=>q[0] }
+#     PREREQ_PM => { Config::Simple=>q[0], File::Spec=>q[0], File::Touch=>q[0], Test::Pod=>q[0], File::Find=>q[0], File::Path=>q[0], Module::Pluggable=>q[0], Getopt::Long=>q[0], File::Find::Rule=>q[0], Test::Pod::Coverage=>q[0], Test::File=>q[1.33], Image::Magick=>q[0], Test::More=>q[0], File::Temp=>q[0], File::Basename=>q[0], Test::CheckManifest=>q[0], Cwd=>q[0] }
 #     VERSION_FROM => q[lib/CSS/SpriteMaker.pm]
 
 # --- MakeMaker post_initialize section:
@@ -58,9 +59,9 @@ NAME = CSS::SpriteMaker
 NAME_SYM = CSS_SpriteMaker
 VERSION = 0.02
 VERSION_MACRO = VERSION
-VERSION_SYM = 0_01
+VERSION_SYM = 0_02
 DEFINE_VERSION = -D$(VERSION_MACRO)=\"$(VERSION)\"
-XS_VERSION = 0.01
+XS_VERSION = 0.02
 XS_VERSION_MACRO = XS_VERSION
 XS_DEFINE_VERSION = -D$(XS_VERSION_MACRO)=\"$(XS_VERSION)\"
 INST_ARCHLIB = blib/arch
@@ -135,9 +136,9 @@ PERM_DIR = 755
 PERM_RW = 644
 PERM_RWX = 755
 
-MAKEMAKER   = /opt/local/lib/perl5/5.14.2/ExtUtils/MakeMaker.pm
-MM_VERSION  = 6.57_05
-MM_REVISION = 65705
+MAKEMAKER   = /Users/darksmo/code/ext/lib/perl5//ExtUtils/MakeMaker.pm
+MM_VERSION  = 6.62
+MM_REVISION = 66200
 
 # FULLEXT = Pathname for extension directory (eg Foo/Bar/Oracle).
 # BASEEXT = Basename part of FULLEXT. May be just equal FULLEXT. (eg Oracle)
@@ -159,10 +160,11 @@ XS_FILES =
 C_FILES  = 
 O_FILES  = 
 H_FILES  = 
-MAN1PODS = bin/makesprite
+MAN1PODS = 
 MAN3PODS = lib/CSS/SpriteMaker.pm \
 	lib/CSS/SpriteMaker/Layout.pm \
 	lib/CSS/SpriteMaker/Layout/DirectoryBased.pm \
+	lib/CSS/SpriteMaker/Layout/FixedDimension.pm \
 	lib/CSS/SpriteMaker/Layout/Packed.pm \
 	lib/CSS/SpriteMaker/Layout/Utils/BinPacking.pm
 
@@ -186,10 +188,11 @@ PERL_ARCHIVE       =
 PERL_ARCHIVE_AFTER = 
 
 
-TO_INST_PM = lib/CSS/.SpriteMaker.pm.swo \
+TO_INST_PM = foo.pl \
 	lib/CSS/SpriteMaker.pm \
 	lib/CSS/SpriteMaker/Layout.pm \
 	lib/CSS/SpriteMaker/Layout/DirectoryBased.pm \
+	lib/CSS/SpriteMaker/Layout/FixedDimension.pm \
 	lib/CSS/SpriteMaker/Layout/Packed.pm \
 	lib/CSS/SpriteMaker/Layout/Utils/BinPacking.pm
 
@@ -197,18 +200,20 @@ PM_TO_BLIB = lib/CSS/SpriteMaker/Layout.pm \
 	blib/lib/CSS/SpriteMaker/Layout.pm \
 	lib/CSS/SpriteMaker/Layout/Packed.pm \
 	blib/lib/CSS/SpriteMaker/Layout/Packed.pm \
+	foo.pl \
+	$(INST_LIB)/CSS/foo.pl \
 	lib/CSS/SpriteMaker/Layout/DirectoryBased.pm \
 	blib/lib/CSS/SpriteMaker/Layout/DirectoryBased.pm \
-	lib/CSS/.SpriteMaker.pm.swo \
-	blib/lib/CSS/.SpriteMaker.pm.swo \
 	lib/CSS/SpriteMaker.pm \
 	blib/lib/CSS/SpriteMaker.pm \
+	lib/CSS/SpriteMaker/Layout/FixedDimension.pm \
+	blib/lib/CSS/SpriteMaker/Layout/FixedDimension.pm \
 	lib/CSS/SpriteMaker/Layout/Utils/BinPacking.pm \
 	blib/lib/CSS/SpriteMaker/Layout/Utils/BinPacking.pm
 
 
 # --- MakeMaker platform_constants section:
-MM_Unix_VERSION = 6.57_05
+MM_Unix_VERSION = 6.62
 PERL_MALLOC_DEF = -DPERL_EXTMALLOC_DEF -Dmalloc=Perl_malloc -Dfree=Perl_mfree -Drealloc=Perl_realloc -Dcalloc=Perl_calloc
 
 
@@ -273,7 +278,7 @@ RCS_LABEL = rcs -Nv$(VERSION_SYM): -q
 DIST_CP = best
 DIST_DEFAULT = tardist
 DISTNAME = CSS-SpriteMaker
-DISTVNAME = CSS-SpriteMaker-0.01
+DISTVNAME = CSS-SpriteMaker-0.02
 
 
 # --- MakeMaker macro section:
@@ -426,19 +431,18 @@ POD2MAN = $(POD2MAN_EXE)
 
 
 manifypods : pure_all  \
-	bin/makesprite \
 	lib/CSS/SpriteMaker/Layout.pm \
 	lib/CSS/SpriteMaker/Layout/Packed.pm \
 	lib/CSS/SpriteMaker/Layout/DirectoryBased.pm \
 	lib/CSS/SpriteMaker.pm \
+	lib/CSS/SpriteMaker/Layout/FixedDimension.pm \
 	lib/CSS/SpriteMaker/Layout/Utils/BinPacking.pm
-	$(NOECHO) $(POD2MAN) --section=1 --perm_rw=$(PERM_RW) \
-	  bin/makesprite $(INST_MAN1DIR)/makesprite.$(MAN1EXT) 
 	$(NOECHO) $(POD2MAN) --section=3 --perm_rw=$(PERM_RW) \
 	  lib/CSS/SpriteMaker/Layout.pm $(INST_MAN3DIR)/CSS::SpriteMaker::Layout.$(MAN3EXT) \
 	  lib/CSS/SpriteMaker/Layout/Packed.pm $(INST_MAN3DIR)/CSS::SpriteMaker::Layout::Packed.$(MAN3EXT) \
 	  lib/CSS/SpriteMaker/Layout/DirectoryBased.pm $(INST_MAN3DIR)/CSS::SpriteMaker::Layout::DirectoryBased.$(MAN3EXT) \
 	  lib/CSS/SpriteMaker.pm $(INST_MAN3DIR)/CSS::SpriteMaker.$(MAN3EXT) \
+	  lib/CSS/SpriteMaker/Layout/FixedDimension.pm $(INST_MAN3DIR)/CSS::SpriteMaker::Layout::FixedDimension.$(MAN3EXT) \
 	  lib/CSS/SpriteMaker/Layout/Utils/BinPacking.pm $(INST_MAN3DIR)/CSS::SpriteMaker::Layout::Utils::BinPacking.$(MAN3EXT) 
 
 
@@ -448,22 +452,6 @@ manifypods : pure_all  \
 
 
 # --- MakeMaker installbin section:
-
-EXE_FILES = bin/makesprite
-
-pure_all :: $(INST_SCRIPT)/makesprite
-	$(NOECHO) $(NOOP)
-
-realclean ::
-	$(RM_F) \
-	  $(INST_SCRIPT)/makesprite 
-
-$(INST_SCRIPT)/makesprite : bin/makesprite $(FIRST_MAKEFILE) $(INST_SCRIPT)$(DFSEP).exists $(INST_BIN)$(DFSEP).exists
-	$(NOECHO) $(RM_F) $(INST_SCRIPT)/makesprite
-	$(CP) bin/makesprite $(INST_SCRIPT)/makesprite
-	$(FIXIN) $(INST_SCRIPT)/makesprite
-	-$(NOECHO) $(CHMOD) $(PERM_RWX) $(INST_SCRIPT)/makesprite
-
 
 
 # --- MakeMaker subdirs section:
@@ -485,18 +473,19 @@ clean :: clean_subdirs
 	  *$(LIB_EXT) core \
 	  core.[0-9] $(INST_ARCHAUTODIR)/extralibs.all \
 	  core.[0-9][0-9] $(BASEEXT).bso \
-	  pm_to_blib.ts core.[0-9][0-9][0-9][0-9] \
-	  MYMETA.yml $(BASEEXT).x \
-	  $(BOOTSTRAP) perl$(EXE_EXT) \
-	  tmon.out *$(OBJ_EXT) \
-	  pm_to_blib $(INST_ARCHAUTODIR)/extralibs.ld \
-	  blibdirs.ts core.[0-9][0-9][0-9][0-9][0-9] \
-	  *perl.core core.*perl.*.? \
-	  $(MAKE_APERL_FILE) perl \
-	  $(BASEEXT).def core.[0-9][0-9][0-9] \
-	  mon.out lib$(BASEEXT).def \
-	  perlmain.c perl.exe \
-	  so_locations $(BASEEXT).exp 
+	  pm_to_blib.ts MYMETA.json \
+	  core.[0-9][0-9][0-9][0-9] MYMETA.yml \
+	  $(BASEEXT).x $(BOOTSTRAP) \
+	  perl$(EXE_EXT) tmon.out \
+	  *$(OBJ_EXT) pm_to_blib \
+	  $(INST_ARCHAUTODIR)/extralibs.ld blibdirs.ts \
+	  core.[0-9][0-9][0-9][0-9][0-9] *perl.core \
+	  core.*perl.*.? $(MAKE_APERL_FILE) \
+	  $(BASEEXT).def perl \
+	  core.[0-9][0-9][0-9] mon.out \
+	  lib$(BASEEXT).def perlmain.c \
+	  perl.exe so_locations \
+	  $(BASEEXT).exp 
 	- $(RM_RF) \
 	  blib 
 	- $(MV) $(FIRST_MAKEFILE) $(MAKEFILE_OLD) $(DEV_NULL)
@@ -519,44 +508,104 @@ realclean purge ::  clean realclean_subdirs
 # --- MakeMaker metafile section:
 metafile : create_distdir
 	$(NOECHO) $(ECHO) Generating META.yml
-	$(NOECHO) $(ECHO) '--- #YAML:1.0' > META_new.yml
-	$(NOECHO) $(ECHO) 'name:               CSS-SpriteMaker' >> META_new.yml
-	$(NOECHO) $(ECHO) 'version:            0.01' >> META_new.yml
-	$(NOECHO) $(ECHO) 'abstract:           ~' >> META_new.yml
-	$(NOECHO) $(ECHO) 'author:  []' >> META_new.yml
-	$(NOECHO) $(ECHO) 'license:            unknown' >> META_new.yml
-	$(NOECHO) $(ECHO) 'distribution_type:  module' >> META_new.yml
-	$(NOECHO) $(ECHO) 'configure_requires:' >> META_new.yml
-	$(NOECHO) $(ECHO) '    ExtUtils::MakeMaker:  0' >> META_new.yml
+	$(NOECHO) $(ECHO) '---' > META_new.yml
+	$(NOECHO) $(ECHO) 'abstract: unknown' >> META_new.yml
+	$(NOECHO) $(ECHO) 'author:' >> META_new.yml
+	$(NOECHO) $(ECHO) '  - unknown' >> META_new.yml
 	$(NOECHO) $(ECHO) 'build_requires:' >> META_new.yml
-	$(NOECHO) $(ECHO) '    ExtUtils::MakeMaker:  0' >> META_new.yml
-	$(NOECHO) $(ECHO) 'requires:' >> META_new.yml
-	$(NOECHO) $(ECHO) '    Config::Simple:       0' >> META_new.yml
-	$(NOECHO) $(ECHO) '    Cwd:                  0' >> META_new.yml
-	$(NOECHO) $(ECHO) '    File::Basename:       0' >> META_new.yml
-	$(NOECHO) $(ECHO) '    File::Find:           0' >> META_new.yml
-	$(NOECHO) $(ECHO) '    File::Find::Rule:     0' >> META_new.yml
-	$(NOECHO) $(ECHO) '    File::Path:           0' >> META_new.yml
-	$(NOECHO) $(ECHO) '    File::Spec:           0' >> META_new.yml
-	$(NOECHO) $(ECHO) '    File::Temp:           0' >> META_new.yml
-	$(NOECHO) $(ECHO) '    File::Touch:          0' >> META_new.yml
-	$(NOECHO) $(ECHO) '    Getopt::Long:         0' >> META_new.yml
-	$(NOECHO) $(ECHO) '    Image::Magick:        0' >> META_new.yml
-	$(NOECHO) $(ECHO) '    Module::Pluggable:    0' >> META_new.yml
-	$(NOECHO) $(ECHO) '    Test::CheckManifest:  0' >> META_new.yml
-	$(NOECHO) $(ECHO) '    Test::File:           1.33' >> META_new.yml
-	$(NOECHO) $(ECHO) '    Test::More:           0' >> META_new.yml
-	$(NOECHO) $(ECHO) '    Test::Pod:            0' >> META_new.yml
-	$(NOECHO) $(ECHO) '    Test::Pod::Coverage:  0' >> META_new.yml
-	$(NOECHO) $(ECHO) 'no_index:' >> META_new.yml
-	$(NOECHO) $(ECHO) '    directory:' >> META_new.yml
-	$(NOECHO) $(ECHO) '        - t' >> META_new.yml
-	$(NOECHO) $(ECHO) '        - inc' >> META_new.yml
-	$(NOECHO) $(ECHO) 'generated_by:       ExtUtils::MakeMaker version 6.57_05' >> META_new.yml
+	$(NOECHO) $(ECHO) '  ExtUtils::MakeMaker: 0' >> META_new.yml
+	$(NOECHO) $(ECHO) 'configure_requires:' >> META_new.yml
+	$(NOECHO) $(ECHO) '  ExtUtils::MakeMaker: 0' >> META_new.yml
+	$(NOECHO) $(ECHO) 'dynamic_config: 1' >> META_new.yml
+	$(NOECHO) $(ECHO) 'generated_by: '\''ExtUtils::MakeMaker version 6.62, CPAN::Meta::Converter version 2.112150'\''' >> META_new.yml
+	$(NOECHO) $(ECHO) 'license: unknown' >> META_new.yml
 	$(NOECHO) $(ECHO) 'meta-spec:' >> META_new.yml
-	$(NOECHO) $(ECHO) '    url:      http://module-build.sourceforge.net/META-spec-v1.4.html' >> META_new.yml
-	$(NOECHO) $(ECHO) '    version:  1.4' >> META_new.yml
+	$(NOECHO) $(ECHO) '  url: http://module-build.sourceforge.net/META-spec-v1.4.html' >> META_new.yml
+	$(NOECHO) $(ECHO) '  version: 1.4' >> META_new.yml
+	$(NOECHO) $(ECHO) 'name: CSS-SpriteMaker' >> META_new.yml
+	$(NOECHO) $(ECHO) 'no_index:' >> META_new.yml
+	$(NOECHO) $(ECHO) '  directory:' >> META_new.yml
+	$(NOECHO) $(ECHO) '    - t' >> META_new.yml
+	$(NOECHO) $(ECHO) '    - inc' >> META_new.yml
+	$(NOECHO) $(ECHO) 'requires:' >> META_new.yml
+	$(NOECHO) $(ECHO) '  Config::Simple: 0' >> META_new.yml
+	$(NOECHO) $(ECHO) '  Cwd: 0' >> META_new.yml
+	$(NOECHO) $(ECHO) '  File::Basename: 0' >> META_new.yml
+	$(NOECHO) $(ECHO) '  File::Find: 0' >> META_new.yml
+	$(NOECHO) $(ECHO) '  File::Find::Rule: 0' >> META_new.yml
+	$(NOECHO) $(ECHO) '  File::Path: 0' >> META_new.yml
+	$(NOECHO) $(ECHO) '  File::Spec: 0' >> META_new.yml
+	$(NOECHO) $(ECHO) '  File::Temp: 0' >> META_new.yml
+	$(NOECHO) $(ECHO) '  File::Touch: 0' >> META_new.yml
+	$(NOECHO) $(ECHO) '  Getopt::Long: 0' >> META_new.yml
+	$(NOECHO) $(ECHO) '  Image::Magick: 0' >> META_new.yml
+	$(NOECHO) $(ECHO) '  Module::Pluggable: 0' >> META_new.yml
+	$(NOECHO) $(ECHO) '  Test::CheckManifest: 0' >> META_new.yml
+	$(NOECHO) $(ECHO) '  Test::File: 1.33' >> META_new.yml
+	$(NOECHO) $(ECHO) '  Test::More: 0' >> META_new.yml
+	$(NOECHO) $(ECHO) '  Test::Pod: 0' >> META_new.yml
+	$(NOECHO) $(ECHO) '  Test::Pod::Coverage: 0' >> META_new.yml
+	$(NOECHO) $(ECHO) 'version: 0.02' >> META_new.yml
 	-$(NOECHO) $(MV) META_new.yml $(DISTVNAME)/META.yml
+	$(NOECHO) $(ECHO) Generating META.json
+	$(NOECHO) $(ECHO) '{' > META_new.json
+	$(NOECHO) $(ECHO) '   "abstract" : "unknown",' >> META_new.json
+	$(NOECHO) $(ECHO) '   "author" : [' >> META_new.json
+	$(NOECHO) $(ECHO) '      "unknown"' >> META_new.json
+	$(NOECHO) $(ECHO) '   ],' >> META_new.json
+	$(NOECHO) $(ECHO) '   "dynamic_config" : 1,' >> META_new.json
+	$(NOECHO) $(ECHO) '   "generated_by" : "ExtUtils::MakeMaker version 6.62, CPAN::Meta::Converter version 2.112150",' >> META_new.json
+	$(NOECHO) $(ECHO) '   "license" : [' >> META_new.json
+	$(NOECHO) $(ECHO) '      "unknown"' >> META_new.json
+	$(NOECHO) $(ECHO) '   ],' >> META_new.json
+	$(NOECHO) $(ECHO) '   "meta-spec" : {' >> META_new.json
+	$(NOECHO) $(ECHO) '      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",' >> META_new.json
+	$(NOECHO) $(ECHO) '      "version" : "2"' >> META_new.json
+	$(NOECHO) $(ECHO) '   },' >> META_new.json
+	$(NOECHO) $(ECHO) '   "name" : "CSS-SpriteMaker",' >> META_new.json
+	$(NOECHO) $(ECHO) '   "no_index" : {' >> META_new.json
+	$(NOECHO) $(ECHO) '      "directory" : [' >> META_new.json
+	$(NOECHO) $(ECHO) '         "t",' >> META_new.json
+	$(NOECHO) $(ECHO) '         "inc"' >> META_new.json
+	$(NOECHO) $(ECHO) '      ]' >> META_new.json
+	$(NOECHO) $(ECHO) '   },' >> META_new.json
+	$(NOECHO) $(ECHO) '   "prereqs" : {' >> META_new.json
+	$(NOECHO) $(ECHO) '      "build" : {' >> META_new.json
+	$(NOECHO) $(ECHO) '         "requires" : {' >> META_new.json
+	$(NOECHO) $(ECHO) '            "ExtUtils::MakeMaker" : 0' >> META_new.json
+	$(NOECHO) $(ECHO) '         }' >> META_new.json
+	$(NOECHO) $(ECHO) '      },' >> META_new.json
+	$(NOECHO) $(ECHO) '      "configure" : {' >> META_new.json
+	$(NOECHO) $(ECHO) '         "requires" : {' >> META_new.json
+	$(NOECHO) $(ECHO) '            "ExtUtils::MakeMaker" : 0' >> META_new.json
+	$(NOECHO) $(ECHO) '         }' >> META_new.json
+	$(NOECHO) $(ECHO) '      },' >> META_new.json
+	$(NOECHO) $(ECHO) '      "runtime" : {' >> META_new.json
+	$(NOECHO) $(ECHO) '         "requires" : {' >> META_new.json
+	$(NOECHO) $(ECHO) '            "Config::Simple" : 0,' >> META_new.json
+	$(NOECHO) $(ECHO) '            "Cwd" : 0,' >> META_new.json
+	$(NOECHO) $(ECHO) '            "File::Basename" : 0,' >> META_new.json
+	$(NOECHO) $(ECHO) '            "File::Find" : 0,' >> META_new.json
+	$(NOECHO) $(ECHO) '            "File::Find::Rule" : 0,' >> META_new.json
+	$(NOECHO) $(ECHO) '            "File::Path" : 0,' >> META_new.json
+	$(NOECHO) $(ECHO) '            "File::Spec" : 0,' >> META_new.json
+	$(NOECHO) $(ECHO) '            "File::Temp" : 0,' >> META_new.json
+	$(NOECHO) $(ECHO) '            "File::Touch" : 0,' >> META_new.json
+	$(NOECHO) $(ECHO) '            "Getopt::Long" : 0,' >> META_new.json
+	$(NOECHO) $(ECHO) '            "Image::Magick" : 0,' >> META_new.json
+	$(NOECHO) $(ECHO) '            "Module::Pluggable" : 0,' >> META_new.json
+	$(NOECHO) $(ECHO) '            "Test::CheckManifest" : 0,' >> META_new.json
+	$(NOECHO) $(ECHO) '            "Test::File" : "1.33",' >> META_new.json
+	$(NOECHO) $(ECHO) '            "Test::More" : 0,' >> META_new.json
+	$(NOECHO) $(ECHO) '            "Test::Pod" : 0,' >> META_new.json
+	$(NOECHO) $(ECHO) '            "Test::Pod::Coverage" : 0' >> META_new.json
+	$(NOECHO) $(ECHO) '         }' >> META_new.json
+	$(NOECHO) $(ECHO) '      }' >> META_new.json
+	$(NOECHO) $(ECHO) '   },' >> META_new.json
+	$(NOECHO) $(ECHO) '   "release_status" : "stable",' >> META_new.json
+	$(NOECHO) $(ECHO) '   "version" : "0.02"' >> META_new.json
+	$(NOECHO) $(ECHO) '}' >> META_new.json
+	-$(NOECHO) $(MV) META_new.json $(DISTVNAME)/META.json
 
 
 # --- MakeMaker signature section:
@@ -648,8 +697,12 @@ ci :
 
 # --- MakeMaker distmeta section:
 distmeta : create_distdir metafile
-	$(NOECHO) cd $(DISTVNAME) && $(ABSPERLRUN) -MExtUtils::Manifest=maniadd -e 'eval { maniadd({q{META.yml} => q{Module meta-data (added by MakeMaker)}}) } ' \
+	$(NOECHO) cd $(DISTVNAME) && $(ABSPERLRUN) -MExtUtils::Manifest=maniadd -e 'exit unless -e q{META.yml};' \
+	  -e 'eval { maniadd({q{META.yml} => q{Module YAML meta-data (added by MakeMaker)}}) }' \
 	  -e '    or print "Could not add META.yml to MANIFEST: $${'\''@'\''}\n"' --
+	$(NOECHO) cd $(DISTVNAME) && $(ABSPERLRUN) -MExtUtils::Manifest=maniadd -e 'exit unless -f q{META.json};' \
+	  -e 'eval { maniadd({q{META.json} => q{Module JSON meta-data (added by MakeMaker)}}) }' \
+	  -e '    or print "Could not add META.json to MANIFEST: $${'\''@'\''}\n"' --
 
 
 
@@ -846,7 +899,7 @@ testdb_static :: testdb_dynamic
 # --- MakeMaker ppd section:
 # Creates a PPD (Perl Package Description) for a binary distribution.
 ppd :
-	$(NOECHO) $(ECHO) '<SOFTPKG NAME="$(DISTNAME)" VERSION="0.01">' > $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) '<SOFTPKG NAME="$(DISTNAME)" VERSION="0.02">' > $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <ABSTRACT></ABSTRACT>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <AUTHOR></AUTHOR>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <IMPLEMENTATION>' >> $(DISTNAME).ppd
@@ -879,9 +932,10 @@ pm_to_blib : $(FIRST_MAKEFILE) $(TO_INST_PM)
 	$(NOECHO) $(ABSPERLRUN) -MExtUtils::Install -e 'pm_to_blib({@ARGV}, '\''$(INST_LIB)/auto'\'', q[$(PM_FILTER)], '\''$(PERM_DIR)'\'')' -- \
 	  lib/CSS/SpriteMaker/Layout.pm blib/lib/CSS/SpriteMaker/Layout.pm \
 	  lib/CSS/SpriteMaker/Layout/Packed.pm blib/lib/CSS/SpriteMaker/Layout/Packed.pm \
+	  foo.pl $(INST_LIB)/CSS/foo.pl \
 	  lib/CSS/SpriteMaker/Layout/DirectoryBased.pm blib/lib/CSS/SpriteMaker/Layout/DirectoryBased.pm \
-	  lib/CSS/.SpriteMaker.pm.swo blib/lib/CSS/.SpriteMaker.pm.swo \
 	  lib/CSS/SpriteMaker.pm blib/lib/CSS/SpriteMaker.pm \
+	  lib/CSS/SpriteMaker/Layout/FixedDimension.pm blib/lib/CSS/SpriteMaker/Layout/FixedDimension.pm \
 	  lib/CSS/SpriteMaker/Layout/Utils/BinPacking.pm blib/lib/CSS/SpriteMaker/Layout/Utils/BinPacking.pm 
 	$(NOECHO) $(TOUCH) pm_to_blib
 

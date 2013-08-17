@@ -11,7 +11,7 @@ sub magic_number_matches {
   open FH, '_build/magicnum' or return 0;
   my $filenum = <FH>;
   close FH;
-  return $filenum == 106906;
+  return $filenum == 185704;
 }
 
 my $progname;
@@ -31,14 +31,29 @@ BEGIN {
   }
   unshift @INC,
     (
-
+     '/Users/darksmo/code/perl/lib',
+     '/Users/darksmo/code/ext/lib/perl5/site_perl/5.14.2/darwin-thread-multi-2level',
+     '/Users/darksmo/code/ext/lib/perl5/site_perl/5.14.2',
+     '/Users/darksmo/code/ext/lib/perl5/site_perl',
+     '/Users/darksmo/code/ext/lib/perl5/5.14.2/darwin-thread-multi-2level',
+     '/Users/darksmo/code/ext/lib/perl5/5.14.2',
+     '/Users/darksmo/code/ext/lib/perl5/darwin-thread-multi-2level',
+     '/Users/darksmo/code/ext/lib/perl5',
+     '/Users/darksmo/code/ext/lib/site_perl',
+     '/Users/darksmo/code/ext/lib/perl5/site_perl/5.14.2/darwin-thread-multi-2level',
+     '/Users/darksmo/code/ext/lib/perl5/site_perl/5.14.2',
+     '/Users/darksmo/code/ext/lib/perl5/site_perl',
+     '/Users/darksmo/code/lib/perl5',
+     '/Users/darksmo/code/ext/lib/perl5/5.14.2/darwin-thread-multi-2level',
+     '/Users/darksmo/code/ext/lib/perl5/5.14.2',
+     '/Users/darksmo/code/ext/lib/perl5/darwin-thread-multi-2level',
+     '/Users/darksmo/code/ext/lib/perl5'
     );
 }
 
 close(*DATA) unless eof(*DATA); # ensure no open handles to this script
 
 use Module::Build;
-Module::Build->VERSION(q{0.38});
 
 # Some platforms have problems setting $^X in shebang contexts, fix it up here
 $^X = Module::Build->find_perl_interpreter;
