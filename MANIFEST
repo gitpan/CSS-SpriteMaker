@@ -1,17 +1,21 @@
-Build
 Build.PL
 Changes
 lib/CSS/SpriteMaker.pm
 lib/CSS/SpriteMaker/Layout.pm
 lib/CSS/SpriteMaker/Layout/DirectoryBased.pm
+lib/CSS/SpriteMaker/Layout/FixedDimension.pm
 lib/CSS/SpriteMaker/Layout/Packed.pm
 lib/CSS/SpriteMaker/Layout/Utils/BinPacking.pm
+make_all.sh
 Makefile
+Makefile.old
 Makefile.PL
 MANIFEST			This list of files
 MANIFEST.SKIP
 META.json
 META.yml
+pm_to_blib
+quick_test_dont_commit.pl
 README
 sample_icons/apple.png
 sample_icons/banknote.png
@@ -67,6 +71,7 @@ t/01-make.t
 t/02-_locate_image_files.t
 t/03-get_css_info_structure.t
 t/04-_ensure_layout.t
+t/05-layout_fixed_dimension.t
 t/05-print_css.t
 t/06-print_html.t
 t/07-_generate_css_class_name.t
