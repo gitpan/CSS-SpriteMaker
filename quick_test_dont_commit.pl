@@ -3,30 +3,46 @@ use warnings;
 
 use CSS::SpriteMaker;
 
-my $SM = CSS::SpriteMaker->new();
+my $SM = CSS::SpriteMaker->new(
+    verbose => 1
+);
 
-# $SM->make_sprite(
-#     source_dir => 'sample_icons',
-#     target_file => 'packed.png',
-#     layout_name => 'Packed'
-# );
-# 
-# $SM->make_sprite(
-#     source_dir => 'sample_icons',
-#     target_file => 'directory_based.png',
-#     layout => {
-#         name => 'DirectoryBased',
-#     }
-# );
-
-$SM->make_sprite(
-    source_dir => 'sample_icons',
-    target_file => 'fixed_dimension.png',
+$SM->compose_sprite (
+    parts => [
+        { source_dir => 'sample_icons',
+          layout_name => 'Packed' 
+        },
+        {
+            source_dir => 'sample_icons',
+            layout => {
+                name => 'Packed',
+                options => {
+                    'dimension' => 'horizontal',
+                    'n' => 1,
+                }
+            }
+        },
+        {
+            source_dir => 'sample_icons',
+            layout => {
+                name => 'Packed',
+                options => {
+                    'dimension' => 'vertical',
+                    'n' => 1,
+                }
+            }
+        }
+    ],
+    # the composing layout
     layout => {
         name => 'FixedDimension',
         options => {
-            'dimension' => 'vertical',
-            'n' => 2,
+            n => 2,
         }
-    }
+    },
+    target_file => 'composite.png',
 );
+
+$SM->print_css();
+
+$SM->print_html();
