@@ -3,8 +3,6 @@ package CSS::SpriteMaker;
 use strict;
 use warnings;
 
-use feature qw(say);
-
 use File::Find;
 use Image::Magick;
 
@@ -27,7 +25,7 @@ Version 0.05
 
 =cut
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 
 =head1 SYNOPSIS
