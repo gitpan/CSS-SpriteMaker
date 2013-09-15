@@ -1,9 +1,16 @@
 ^MYMETA.yml$
 ^\.
 ^_build
+^pm_to_blib$
 ^blib
+^Makefile$
 ^MYMETA\.json$
 ^ignore.txt$
 ^MANIFEST.bak$
 ^Build$
 ^CSS\-SpriteMaker.*.tar.gz$
+^quick_test_dont_commit.pl$
+^make_all.sh$
+^sample_icons2
+^sample_icons3
+^[a-z0-9A-Z]+[.]png$

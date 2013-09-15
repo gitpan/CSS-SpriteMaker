@@ -1,7 +1,7 @@
 # This Makefile is for the CSS::SpriteMaker extension to perl.
 #
 # It was generated automatically by MakeMaker version
-# 6.62 (Revision: 66200) from the contents of
+# 6.68 (Revision: 66800) from the contents of
 # Makefile.PL. Don't edit this file, edit Makefile.PL instead.
 #
 #       ANY CHANGES MADE HERE WILL BE LOST!
@@ -18,6 +18,7 @@
 #     NAME => q[CSS::SpriteMaker]
 #     PL_FILES => {  }
 #     PREREQ_PM => { Config::Simple=>q[0], File::Spec=>q[0], File::Touch=>q[0], Test::Pod=>q[0], File::Find=>q[0], File::Path=>q[0], Module::Pluggable=>q[0], Getopt::Long=>q[0], File::Find::Rule=>q[0], Test::Pod::Coverage=>q[0], Test::File=>q[1.33], Image::Magick=>q[0], Test::More=>q[0], File::Temp=>q[0], File::Basename=>q[0], Test::CheckManifest=>q[0], Cwd=>q[0] }
+#     TEST_REQUIRES => {  }
 #     VERSION_FROM => q[lib/CSS/SpriteMaker.pm]
 
 # --- MakeMaker post_initialize section:
@@ -57,11 +58,11 @@ DIRFILESEP = /
 DFSEP = $(DIRFILESEP)
 NAME = CSS::SpriteMaker
 NAME_SYM = CSS_SpriteMaker
-VERSION = 0.02
+VERSION = 0.06
 VERSION_MACRO = VERSION
-VERSION_SYM = 0_02
+VERSION_SYM = 0_06
 DEFINE_VERSION = -D$(VERSION_MACRO)=\"$(VERSION)\"
-XS_VERSION = 0.02
+XS_VERSION = 0.06
 XS_VERSION_MACRO = XS_VERSION
 XS_DEFINE_VERSION = -D$(XS_VERSION_MACRO)=\"$(XS_VERSION)\"
 INST_ARCHLIB = blib/arch
@@ -136,9 +137,9 @@ PERM_DIR = 755
 PERM_RW = 644
 PERM_RWX = 755
 
-MAKEMAKER   = /Users/darksmo/code/ext/lib/perl5//ExtUtils/MakeMaker.pm
-MM_VERSION  = 6.62
-MM_REVISION = 66200
+MAKEMAKER   = /opt/local/lib/perl5/5.14.2/ExtUtils/MakeMaker.pm
+MM_VERSION  = 6.68
+MM_REVISION = 66800
 
 # FULLEXT = Pathname for extension directory (eg Foo/Bar/Oracle).
 # BASEEXT = Basename part of FULLEXT. May be just equal FULLEXT. (eg Oracle)
@@ -166,7 +167,7 @@ MAN3PODS = lib/CSS/SpriteMaker.pm \
 	lib/CSS/SpriteMaker/Layout/DirectoryBased.pm \
 	lib/CSS/SpriteMaker/Layout/FixedDimension.pm \
 	lib/CSS/SpriteMaker/Layout/Packed.pm \
-	lib/CSS/SpriteMaker/Layout/Utils/BinPacking.pm
+	lib/CSS/SpriteMaker/Layout/Packed/Node.pm
 
 # Where is the Config information that we are using/depend on
 CONFIGDEP = $(PERL_ARCHLIB)$(DFSEP)Config.pm $(PERL_INC)$(DFSEP)config.h
@@ -188,38 +189,38 @@ PERL_ARCHIVE       =
 PERL_ARCHIVE_AFTER = 
 
 
-TO_INST_PM = foo.pl \
-	lib/CSS/SpriteMaker.pm \
+TO_INST_PM = lib/CSS/SpriteMaker.pm \
 	lib/CSS/SpriteMaker/Layout.pm \
 	lib/CSS/SpriteMaker/Layout/DirectoryBased.pm \
 	lib/CSS/SpriteMaker/Layout/FixedDimension.pm \
 	lib/CSS/SpriteMaker/Layout/Packed.pm \
-	lib/CSS/SpriteMaker/Layout/Utils/BinPacking.pm
+	lib/CSS/SpriteMaker/Layout/Packed/Node.pm \
+	quick_test_dont_commit.pl
 
-PM_TO_BLIB = lib/CSS/SpriteMaker/Layout.pm \
+PM_TO_BLIB = lib/CSS/SpriteMaker/Layout/Packed/Node.pm \
+	blib/lib/CSS/SpriteMaker/Layout/Packed/Node.pm \
+	lib/CSS/SpriteMaker/Layout.pm \
 	blib/lib/CSS/SpriteMaker/Layout.pm \
 	lib/CSS/SpriteMaker/Layout/Packed.pm \
 	blib/lib/CSS/SpriteMaker/Layout/Packed.pm \
-	foo.pl \
-	$(INST_LIB)/CSS/foo.pl \
 	lib/CSS/SpriteMaker/Layout/DirectoryBased.pm \
 	blib/lib/CSS/SpriteMaker/Layout/DirectoryBased.pm \
 	lib/CSS/SpriteMaker.pm \
 	blib/lib/CSS/SpriteMaker.pm \
 	lib/CSS/SpriteMaker/Layout/FixedDimension.pm \
 	blib/lib/CSS/SpriteMaker/Layout/FixedDimension.pm \
-	lib/CSS/SpriteMaker/Layout/Utils/BinPacking.pm \
-	blib/lib/CSS/SpriteMaker/Layout/Utils/BinPacking.pm
+	quick_test_dont_commit.pl \
+	$(INST_LIB)/CSS/quick_test_dont_commit.pl
 
 
 # --- MakeMaker platform_constants section:
-MM_Unix_VERSION = 6.62
+MM_Unix_VERSION = 6.68
 PERL_MALLOC_DEF = -DPERL_EXTMALLOC_DEF -Dmalloc=Perl_malloc -Dfree=Perl_mfree -Drealloc=Perl_realloc -Dcalloc=Perl_calloc
 
 
 # --- MakeMaker tool_autosplit section:
 # Usage: $(AUTOSPLITFILE) FileToSplit AutoDirToSplitInto
-AUTOSPLITFILE = $(ABSPERLRUN)  -e 'use AutoSplit;  autosplit($$ARGV[0], $$ARGV[1], 0, 1, 1)' --
+AUTOSPLITFILE = $(ABSPERLRUN)  -e 'use AutoSplit;  autosplit($$$$ARGV[0], $$$$ARGV[1], 0, 1, 1)' --
 
 
 
@@ -278,7 +279,7 @@ RCS_LABEL = rcs -Nv$(VERSION_SYM): -q
 DIST_CP = best
 DIST_DEFAULT = tardist
 DISTNAME = CSS-SpriteMaker
-DISTVNAME = CSS-SpriteMaker-0.02
+DISTVNAME = CSS-SpriteMaker-0.06
 
 
 # --- MakeMaker macro section:
@@ -431,19 +432,19 @@ POD2MAN = $(POD2MAN_EXE)
 
 
 manifypods : pure_all  \
+	lib/CSS/SpriteMaker/Layout/Packed/Node.pm \
 	lib/CSS/SpriteMaker/Layout.pm \
 	lib/CSS/SpriteMaker/Layout/Packed.pm \
 	lib/CSS/SpriteMaker/Layout/DirectoryBased.pm \
 	lib/CSS/SpriteMaker.pm \
-	lib/CSS/SpriteMaker/Layout/FixedDimension.pm \
-	lib/CSS/SpriteMaker/Layout/Utils/BinPacking.pm
+	lib/CSS/SpriteMaker/Layout/FixedDimension.pm
 	$(NOECHO) $(POD2MAN) --section=3 --perm_rw=$(PERM_RW) \
+	  lib/CSS/SpriteMaker/Layout/Packed/Node.pm $(INST_MAN3DIR)/CSS::SpriteMaker::Layout::Packed::Node.$(MAN3EXT) \
 	  lib/CSS/SpriteMaker/Layout.pm $(INST_MAN3DIR)/CSS::SpriteMaker::Layout.$(MAN3EXT) \
 	  lib/CSS/SpriteMaker/Layout/Packed.pm $(INST_MAN3DIR)/CSS::SpriteMaker::Layout::Packed.$(MAN3EXT) \
 	  lib/CSS/SpriteMaker/Layout/DirectoryBased.pm $(INST_MAN3DIR)/CSS::SpriteMaker::Layout::DirectoryBased.$(MAN3EXT) \
 	  lib/CSS/SpriteMaker.pm $(INST_MAN3DIR)/CSS::SpriteMaker.$(MAN3EXT) \
-	  lib/CSS/SpriteMaker/Layout/FixedDimension.pm $(INST_MAN3DIR)/CSS::SpriteMaker::Layout::FixedDimension.$(MAN3EXT) \
-	  lib/CSS/SpriteMaker/Layout/Utils/BinPacking.pm $(INST_MAN3DIR)/CSS::SpriteMaker::Layout::Utils::BinPacking.$(MAN3EXT) 
+	  lib/CSS/SpriteMaker/Layout/FixedDimension.pm $(INST_MAN3DIR)/CSS::SpriteMaker::Layout::FixedDimension.$(MAN3EXT) 
 
 
 
@@ -517,7 +518,7 @@ metafile : create_distdir
 	$(NOECHO) $(ECHO) 'configure_requires:' >> META_new.yml
 	$(NOECHO) $(ECHO) '  ExtUtils::MakeMaker: 0' >> META_new.yml
 	$(NOECHO) $(ECHO) 'dynamic_config: 1' >> META_new.yml
-	$(NOECHO) $(ECHO) 'generated_by: '\''ExtUtils::MakeMaker version 6.62, CPAN::Meta::Converter version 2.112150'\''' >> META_new.yml
+	$(NOECHO) $(ECHO) 'generated_by: '\''ExtUtils::MakeMaker version 6.68, CPAN::Meta::Converter version 2.112621'\''' >> META_new.yml
 	$(NOECHO) $(ECHO) 'license: unknown' >> META_new.yml
 	$(NOECHO) $(ECHO) 'meta-spec:' >> META_new.yml
 	$(NOECHO) $(ECHO) '  url: http://module-build.sourceforge.net/META-spec-v1.4.html' >> META_new.yml
@@ -545,7 +546,7 @@ metafile : create_distdir
 	$(NOECHO) $(ECHO) '  Test::More: 0' >> META_new.yml
 	$(NOECHO) $(ECHO) '  Test::Pod: 0' >> META_new.yml
 	$(NOECHO) $(ECHO) '  Test::Pod::Coverage: 0' >> META_new.yml
-	$(NOECHO) $(ECHO) 'version: 0.02' >> META_new.yml
+	$(NOECHO) $(ECHO) 'version: 0.06' >> META_new.yml
 	-$(NOECHO) $(MV) META_new.yml $(DISTVNAME)/META.yml
 	$(NOECHO) $(ECHO) Generating META.json
 	$(NOECHO) $(ECHO) '{' > META_new.json
@@ -554,7 +555,7 @@ metafile : create_distdir
 	$(NOECHO) $(ECHO) '      "unknown"' >> META_new.json
 	$(NOECHO) $(ECHO) '   ],' >> META_new.json
 	$(NOECHO) $(ECHO) '   "dynamic_config" : 1,' >> META_new.json
-	$(NOECHO) $(ECHO) '   "generated_by" : "ExtUtils::MakeMaker version 6.62, CPAN::Meta::Converter version 2.112150",' >> META_new.json
+	$(NOECHO) $(ECHO) '   "generated_by" : "ExtUtils::MakeMaker version 6.68, CPAN::Meta::Converter version 2.112621",' >> META_new.json
 	$(NOECHO) $(ECHO) '   "license" : [' >> META_new.json
 	$(NOECHO) $(ECHO) '      "unknown"' >> META_new.json
 	$(NOECHO) $(ECHO) '   ],' >> META_new.json
@@ -603,7 +604,7 @@ metafile : create_distdir
 	$(NOECHO) $(ECHO) '      }' >> META_new.json
 	$(NOECHO) $(ECHO) '   },' >> META_new.json
 	$(NOECHO) $(ECHO) '   "release_status" : "stable",' >> META_new.json
-	$(NOECHO) $(ECHO) '   "version" : "0.02"' >> META_new.json
+	$(NOECHO) $(ECHO) '   "version" : "0.06"' >> META_new.json
 	$(NOECHO) $(ECHO) '}' >> META_new.json
 	-$(NOECHO) $(MV) META_new.json $(DISTVNAME)/META.json
 
@@ -699,17 +700,17 @@ ci :
 distmeta : create_distdir metafile
 	$(NOECHO) cd $(DISTVNAME) && $(ABSPERLRUN) -MExtUtils::Manifest=maniadd -e 'exit unless -e q{META.yml};' \
 	  -e 'eval { maniadd({q{META.yml} => q{Module YAML meta-data (added by MakeMaker)}}) }' \
-	  -e '    or print "Could not add META.yml to MANIFEST: $${'\''@'\''}\n"' --
+	  -e '    or print "Could not add META.yml to MANIFEST: $$$${'\''@'\''}\n"' --
 	$(NOECHO) cd $(DISTVNAME) && $(ABSPERLRUN) -MExtUtils::Manifest=maniadd -e 'exit unless -f q{META.json};' \
 	  -e 'eval { maniadd({q{META.json} => q{Module JSON meta-data (added by MakeMaker)}}) }' \
-	  -e '    or print "Could not add META.json to MANIFEST: $${'\''@'\''}\n"' --
+	  -e '    or print "Could not add META.json to MANIFEST: $$$${'\''@'\''}\n"' --
 
 
 
 # --- MakeMaker distsignature section:
 distsignature : create_distdir
 	$(NOECHO) cd $(DISTVNAME) && $(ABSPERLRUN) -MExtUtils::Manifest=maniadd -e 'eval { maniadd({q{SIGNATURE} => q{Public-key signature (added by MakeMaker)}}) } ' \
-	  -e '    or print "Could not add SIGNATURE to MANIFEST: $${'\''@'\''}\n"' --
+	  -e '    or print "Could not add SIGNATURE to MANIFEST: $$$${'\''@'\''}\n"' --
 	$(NOECHO) cd $(DISTVNAME) && $(TOUCH) SIGNATURE
 	cd $(DISTVNAME) && cpansign -s
 
@@ -899,7 +900,7 @@ testdb_static :: testdb_dynamic
 # --- MakeMaker ppd section:
 # Creates a PPD (Perl Package Description) for a binary distribution.
 ppd :
-	$(NOECHO) $(ECHO) '<SOFTPKG NAME="$(DISTNAME)" VERSION="0.02">' > $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) '<SOFTPKG NAME="$(DISTNAME)" VERSION="$(VERSION)">' > $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <ABSTRACT></ABSTRACT>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <AUTHOR></AUTHOR>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <IMPLEMENTATION>' >> $(DISTNAME).ppd
@@ -930,13 +931,13 @@ ppd :
 
 pm_to_blib : $(FIRST_MAKEFILE) $(TO_INST_PM)
 	$(NOECHO) $(ABSPERLRUN) -MExtUtils::Install -e 'pm_to_blib({@ARGV}, '\''$(INST_LIB)/auto'\'', q[$(PM_FILTER)], '\''$(PERM_DIR)'\'')' -- \
+	  lib/CSS/SpriteMaker/Layout/Packed/Node.pm blib/lib/CSS/SpriteMaker/Layout/Packed/Node.pm \
 	  lib/CSS/SpriteMaker/Layout.pm blib/lib/CSS/SpriteMaker/Layout.pm \
 	  lib/CSS/SpriteMaker/Layout/Packed.pm blib/lib/CSS/SpriteMaker/Layout/Packed.pm \
-	  foo.pl $(INST_LIB)/CSS/foo.pl \
 	  lib/CSS/SpriteMaker/Layout/DirectoryBased.pm blib/lib/CSS/SpriteMaker/Layout/DirectoryBased.pm \
 	  lib/CSS/SpriteMaker.pm blib/lib/CSS/SpriteMaker.pm \
 	  lib/CSS/SpriteMaker/Layout/FixedDimension.pm blib/lib/CSS/SpriteMaker/Layout/FixedDimension.pm \
-	  lib/CSS/SpriteMaker/Layout/Utils/BinPacking.pm blib/lib/CSS/SpriteMaker/Layout/Utils/BinPacking.pm 
+	  quick_test_dont_commit.pl $(INST_LIB)/CSS/quick_test_dont_commit.pl 
 	$(NOECHO) $(TOUCH) pm_to_blib
 
 

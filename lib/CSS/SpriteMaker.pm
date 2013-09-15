@@ -5,6 +5,7 @@ use warnings;
 
 use File::Find;
 use Image::Magick;
+use List::Util qw(max);
 
 use Module::Pluggable 
     search_path => ['CSS::SpriteMaker::Layout'],
@@ -21,11 +22,11 @@ CSS::SpriteMaker - Combine several images into a single CSS sprite
 
 =head1 VERSION
 
-Version 0.05
+Version 0.07
 
 =cut
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 
 =head1 SYNOPSIS
@@ -34,7 +35,17 @@ our $VERSION = '0.06';
 
     my $SpriteMaker = CSS::SpriteMaker->new(
         verbose => 1, # optional
+
+        # if provided will replace the default way of creating css classnames
+        # out of image filenames.
+        #
         rc_filename_to_classname => sub { my $filename = shift; ... } # optional
+
+        # this callback gets called after the css class name for an image is
+        # generated. It is the latest possible moment at which you can modify
+        # the resulting css class name (e.g., add a prefix to it).
+        #
+        rc_override_classname => sub { my $css_class = shift; ... } # optional
     );
 
     $SpriteMaker->make_sprite(
@@ -166,6 +177,7 @@ sub new {
             options => {}
         },
         rc_filename_to_classname => $opts{rc_filename_to_classname},
+        rc_override_classname => $opts{rc_override_classname},
 
         # the maximum color value
         color_max => 2 ** Image::Magick->QuantumDepth - 1,
@@ -189,6 +201,7 @@ my $is_error = $SpriteMaker->compose_sprite (
           layout => { 
               name => 'DirectoryBased',
           }
+          include_in_css => 0, # optional
         },
     ],
     # arrange the previous two layout using a glue layout
@@ -201,85 +214,21 @@ my $is_error = $SpriteMaker->compose_sprite (
     format => 'png8', # optional, default is png
 );
 
+Note the optional include_in_css option, which allows to exclude a group of
+images from the CSS (still including them in the resulting image).
+
 =cut
 
 sub compose_sprite {
     my $self = shift;
     my %options = @_;
 
-    my @parts = @{$options{parts}};
-
-    my $i = 0;
-
-    # compose the following rh_source_info of Layout objects
-    my $rh_layout_source_info = {};
-
-    # also join each rh_sources_info_from the parts...
-    my %global_sources_info;
-
-    # keep all the layouts
-    my @layouts;
-
-    # layout each part
-    for my $rh_part (@parts) {
-
-        my $rh_sources_info = $self->_ensure_sources_info(%$rh_part);
-        for my $key (keys %$rh_sources_info) {
-            $global_sources_info{$key} = $rh_sources_info->{$key};
-        }
-
-        my $Layout = $self->_ensure_layout(%$rh_part,
-            rh_sources_info => $rh_sources_info
-        );
-
-        # we now do as if we were having images, but actually we have layouts
-        # to do this we re-build a typical rh_sources_info.
-        $rh_layout_source_info->{$i++} = {
-            name => sprintf("%sLayout%s", $options{layout_name} // $options{layout}{name}, $i),
-            pathname => "/fake/path_$i",
-            parentdir => "/fake",
-            width => $Layout->width,
-            height => $Layout->height,
-            first_pixel_x => 0,
-            first_pixel_y => 0,
-        };
-
-        # save this layout
-        push @layouts, $Layout;
+    if (exists $options{layout}) {
+        return $self->_compose_sprite_with_glue(%options);
     }
-
-    # now that we have the $rh_source_info **about layouts**, we layout the
-    # layouts...
-    my $LayoutOfLayouts = $self->_ensure_layout(
-        layout => $options{layout},
-        rh_sources_info => $rh_layout_source_info,
-    );
-
-    # we need to adjust the position of each element of the layout according to
-    # the positions of the elements in $LayoutOfLayouts
-    my $FinalLayout;
-    for my $layout_id (sort { $a <=> $b } $LayoutOfLayouts->get_item_ids()) {
-        my $Layout = $layouts[$layout_id];
-        my ($dx, $dy) = $LayoutOfLayouts->get_item_coord($layout_id);
-        $Layout->move_items($dx, $dy);
-        if (!$FinalLayout) {
-            $FinalLayout = $Layout;
-        }
-        else {
-            # merge $FinalLayout <- $Layout
-            $FinalLayout->merge_with($Layout);
-        }
+    else {
+        return $self->_compose_sprite_without_glue(%options);
     }
-
-    # fix width and height
-    $FinalLayout->{width} = $LayoutOfLayouts->width();
-    $FinalLayout->{height} = $LayoutOfLayouts->height();
-
-    # now simply draw the FinalLayout
-    return $self->_write_image(%options,
-        Layout => $FinalLayout,
-        rh_sources_info => \%global_sources_info,
-    );
 }
 
 =head2 make_sprite
@@ -335,6 +284,9 @@ sub make_sprite {
 Creates and prints the css stylesheet for the sprite that was previously
 produced.
 
+You can specify the filename or the filehandle where the output CSS should be
+written:
+
     $SpriteMaker->print_css(
        filehandle => $fh, 
     );
@@ -343,6 +295,17 @@ OR
 
     $SpriteMaker->print_css(
        filename => 'relative/path/to/style.css',
+    );
+
+Optionally you can provide the name of the image file that should be included in
+the CSS file:
+
+    # within the style.css file, override the default path to the sprite image
+    # with "custom/path/to/sprite.png".
+    #
+    $SpriteMaker->print_css(
+       filename => 'relative/path/to/style.css',
+       sprite_filename => 'custom/path/to/sprite.png', # optional
     );
 
 NOTE: make_sprite() must be called before this method is called.
@@ -362,7 +325,11 @@ sub print_css {
 
     $self->_verbose("  * writing css file");
 
-    my $stylesheet = $self->_get_stylesheet_string();
+    my $target_image_filename;
+    if (exists $options{sprite_filename} && $options{sprite_filename}) {
+        $target_image_filename = $options{sprite_filename};
+    }
+    my $stylesheet = $self->_get_stylesheet_string($target_image_filename);
 
     print $fh $stylesheet;
 
@@ -398,11 +365,14 @@ sub print_html {
     
     $self->_verbose("  * writing html sample page");
 
-    my $stylesheet = $self->_get_stylesheet_string($Layout, $rh_sources_info);
+    my $stylesheet = $self->_get_stylesheet_string();
 
     print $fh '<html><head><style type="text/css">';
     print $fh $stylesheet;
     print $fh <<EOCSS;
+    h1 {
+        color: #0073D9;
+    }
     .color {
         width: 10px;
         height: 10px;
@@ -410,31 +380,85 @@ sub print_html {
         float: left;
         border: 1px solid black;
     }
+    .item {
+        margin-bottom: 1em;
+    }
     .item-container {
-        clear: both;
         background-color: #BCE;
-        width: 340px;
+        max-width: 340px;
         margin: 10px;
         -webkit-border-radius: 10px;
         -moz-border-radius: 10px;
         -o-border-radius: 10px;
         border-radius: 10px;
+        overflow: hidden;
+        float: left;
+    }
+    .included {
+        background-color: #BCE;
+    }
+    .not-included {
+        background-color: #BEBEBE;
     }
 EOCSS
-    print $fh '</style></head><body>';
+    print $fh '</style></head><body><h1>CSS::SpriteMaker Image Information</h1>';
 
     # html
     for my $id (keys %$rh_sources_info) {
         my $rh_source_info = $rh_sources_info->{$id};
         
-
         my $css_class = $self->_generate_css_class_name($rh_source_info->{name});
-        $self->_verbose($rh_source_info->{name}, "->", $css_class);
+        $self->_verbose(
+            sprintf("%s -> %s", $rh_source_info->{name}, $css_class)
+        );
 
         $css_class =~ s/[.]//;
 
-        print $fh '<div class="item-container">';
-        print $fh "  <div class=\"item $css_class\"></div>";
+        my $is_included = $rh_source_info->{include_in_css};
+        my $width = $rh_source_info->{width};
+        my $height = $rh_source_info->{height};
+
+        my $onclick = <<EONCLICK;
+    if (typeof current !== 'undefined' && current !== this) {
+        current.style.width = current.w;
+        current.style.height = current.h;
+        current.style.position = '';
+        delete current.w;
+        delete current.h;
+    }
+    if (typeof this.h === 'undefined') {
+        this.h = this.style.height;
+        this.w = this.style.width;
+        this.style.width = '';
+        this.style.height = '';
+        this.style.position = 'fixed';
+        current = this;
+    }
+    else {
+        this.style.width = this.w;
+        this.style.height = this.h;
+        this.style.position = '';
+        delete this.w;
+        delete this.h;
+        current = undefined;
+    }
+EONCLICK
+
+
+        print $fh sprintf(
+            '<div class="item-container%s" onclick="%s" style="padding: 1em; width: %spx; height: %spx;">',
+            $is_included ? ' included' : ' not-included',
+            $onclick,
+            $width, $height
+        );
+
+            
+        if ($is_included) {
+            print $fh "  <div class=\"item $css_class\"></div>";
+        }
+        else {
+            print $fh "  <div class=\"item\" style=\"width: ${width}px; height: ${height}px;\"></div>";
+        }
         print $fh "  <div class=\"item_description\">";
         for my $key (keys %$rh_source_info) {
             next if $key eq "colors";
@@ -531,7 +555,10 @@ sub _generate_css_class_names {
     my %existing_classnames_lookup;
     my %id_to_class_mapping;
 
+    PROCESS_SOURCEINFO:
     for my $id (keys %$rh_source_info) {
+        
+        next PROCESS_SOURCEINFO if !$rh_source_info->{$id}{include_in_css};
 
         my $css_class = $self->_generate_css_class_name(
             $rh_source_info->{$id}{name}
@@ -580,19 +607,22 @@ must have a unique id in the scope of the same CSS::SpriteMaker instance!
 sub _image_locations_to_source_info {
     my $self         = shift;
     my $ra_locations = shift;
+    my $include_in_css = shift // 1;
 
     my %source_info;
     
     # collect properties of each input image. 
-    $self->{_image_id} //= 0;
     IMAGE:
     for my $rh_location (@$ra_locations) {
 
-        my $id = $self->{_image_id};
+        my $id = $self->_get_image_id;
 
         my %properties = %{$self->_get_image_properties(
             $rh_location->{pathname}
         )};
+
+        # add whether to include this item in the css or not
+        $properties{include_in_css} = $include_in_css;
 
         # skip invalid images
         next IMAGE if !%properties;
@@ -603,11 +633,21 @@ sub _image_locations_to_source_info {
         for my $key (keys %properties) {
             $source_info{$id}{$key} = $properties{$key};
         }
-
-        $self->{_image_id}++;
     }
 
     return \%source_info;
+}
+
+=head2 _get_image_id
+
+Returns a global numeric identifier.
+
+=cut
+
+sub _get_image_id {
+    my $self = shift;
+    $self->{_unique_id} //= 0;
+    return $self->{_unique_id}++;
 }
 
 =head2 _locate_image_files
@@ -679,7 +719,9 @@ sub _get_stylesheet_string {
 
     my $rah_cssinfo = $self->get_css_info_structure(); 
 
-    my @classes = map { "." . $_->{css_class} } @$rah_cssinfo;
+    my @classes = map { "." . $_->{css_class} } 
+        grep { defined $_->{css_class} }
+        @$rah_cssinfo;
 
     my @stylesheet;
 
@@ -692,14 +734,16 @@ sub _get_stylesheet_string {
     );
 
     for my $rh_info (@$rah_cssinfo) {
-        push @stylesheet, sprintf(
-            ".%s { background-position: %spx %spx; width: %spx; height: %spx; }",
-            $rh_info->{css_class}, 
-            -1 * $rh_info->{x},
-            -1 * $rh_info->{y},
-            $rh_info->{width},
-            $rh_info->{height},
-        );
+        if (defined $rh_info->{css_class}) {
+            push @stylesheet, sprintf(
+                ".%s { background-position: %spx %spx; width: %spx; height: %spx; }",
+                $rh_info->{css_class}, 
+                -1 * $rh_info->{x},
+                -1 * $rh_info->{y},
+                $rh_info->{width},
+                $rh_info->{height},
+            );
+        }
     }
 
     return join "\n", @stylesheet;
@@ -719,6 +763,7 @@ sub _generate_css_class_name {
     my $filename = shift;
 
     my $rc_filename_to_classname = $self->{rc_filename_to_classname};
+    my $rc_override_classname = $self->{rc_override_classname};
 
     if (defined $rc_filename_to_classname) {
         my $classname = $rc_filename_to_classname->($filename);
@@ -731,6 +776,11 @@ sub _generate_css_class_name {
                 $filename
             );
         }
+    
+        if (defined $rc_override_classname) {
+            $classname = $rc_override_classname->($classname);
+        }
+
         return $classname;
     }
 
@@ -740,8 +790,8 @@ sub _generate_css_class_name {
     # remove image extensions if any
     $css_class =~ s/[.](tif|tiff|gif|jpeg|jpg|jif|jfif|jp2|jpx|j2k|j2c|fpx|pcd|png|pdf)\Z//;
 
-    # remove @ []
-    $css_class =~ s/[@\]\[]//g;
+    # remove @ [] +
+    $css_class =~ s/[+@\]\[]//g;
 
     # turn certain characters into dashes
     $css_class =~ s/[\s_.]/-/g;
@@ -751,6 +801,11 @@ sub _generate_css_class_name {
 
     # remove initial dashes if any
     $css_class =~ s/\A-+//g;
+
+    # allow change (e.g., add prefix)
+    if (defined $rc_override_classname) {
+        $css_class = $rc_override_classname->($css_class);
+    }
 
     return $css_class;
 }
@@ -824,8 +879,13 @@ sub _ensure_sources_info {
             push @locations, @$ra_locations;
         }
 
+        my $include_in_css = exists $options{include_in_css} 
+            ? $options{include_in_css}
+            : 1;
+
         $rh_source_info = $self->_image_locations_to_source_info(
-            \@locations
+            \@locations,
+            $include_in_css,
         );
     }
     
@@ -1182,21 +1242,193 @@ sub _get_image_properties {
     }
 
     # Store information about the color of each pixel
-    # $rh_info->{colors}{map} = {};
-    # for my $x ($rh_info->{first_pixel_x} .. $rh_info->{width}) {
-    #     for my $y ($rh_info->{first_pixel_y} .. $rh_info->{height}) {
-    #         my $color = $Image->Get(
-    #             sprintf('pixel[%s,%s]', $x, $y),
-    #         );
-    #         push @{$rh_info->{colors}{map}{$color}}, {
-    #             x => $x,
-    #             y => $y,
-    #         };
-    #     }
-    # }
+    $rh_info->{colors}{map} = {};
+    for my $x ($rh_info->{first_pixel_x} .. $rh_info->{width}) {
+        for my $y ($rh_info->{first_pixel_y} .. $rh_info->{height}) {
+            my $color = $Image->Get(
+                sprintf('pixel[%s,%s]', $x, $y),
+            );
+            push @{$rh_info->{colors}{map}{$color}}, {
+                x => $x,
+                y => $y,
+            };
+        }
+    }
 
     return $rh_info; 
 }
+
+=head2 _compose_sprite_with_glue
+
+Compose a layout though a glue layout: first each image set is layouted, then
+it is composed using the specified glue layout.
+
+=cut
+
+sub _compose_sprite_with_glue {
+    my $self = shift;
+    my %options = @_;
+
+    my @parts = @{$options{parts}};
+
+    my $i = 0;
+
+    # compose the following rh_source_info of Layout objects
+    my $rh_layout_source_info = {};
+
+    # also join each rh_sources_info_from the parts...
+    my %global_sources_info;
+
+    # keep all the layouts
+    my @layouts;
+
+    # layout each part
+    for my $rh_part (@parts) {
+
+        my $rh_sources_info = $self->_ensure_sources_info(%$rh_part);
+        for my $key (keys %$rh_sources_info) {
+            $global_sources_info{$key} = $rh_sources_info->{$key};
+        }
+
+        my $Layout = $self->_ensure_layout(%$rh_part,
+            rh_sources_info => $rh_sources_info
+        );
+
+        # we now do as if we were having images, but actually we have layouts
+        # to do this we re-build a typical rh_sources_info.
+        $rh_layout_source_info->{$i++} = {
+            name => sprintf("%sLayout%s", $options{layout_name} // $options{layout}{name}, $i),
+            pathname => "/fake/path_$i",
+            parentdir => "/fake",
+            width => $Layout->width,
+            height => $Layout->height,
+            first_pixel_x => 0,
+            first_pixel_y => 0,
+        };
+
+        # save this layout
+        push @layouts, $Layout;
+    }
+
+    # now that we have the $rh_source_info **about layouts**, we layout the
+    # layouts...
+    my $LayoutOfLayouts = $self->_ensure_layout(
+        layout => $options{layout},
+        rh_sources_info => $rh_layout_source_info,
+    );
+
+    # we need to adjust the position of each element of the layout according to
+    # the positions of the elements in $LayoutOfLayouts
+    my $FinalLayout;
+    for my $layout_id (sort { $a <=> $b } $LayoutOfLayouts->get_item_ids()) {
+        my $Layout = $layouts[$layout_id];
+        my ($dx, $dy) = $LayoutOfLayouts->get_item_coord($layout_id);
+        $Layout->move_items($dx, $dy);
+        if (!$FinalLayout) {
+            $FinalLayout = $Layout;
+        }
+        else {
+            # merge $FinalLayout <- $Layout
+            $FinalLayout->merge_with($Layout);
+        }
+    }
+
+    # fix width and height
+    $FinalLayout->{width} = $LayoutOfLayouts->width();
+    $FinalLayout->{height} = $LayoutOfLayouts->height();
+
+    # now simply draw the FinalLayout
+    return $self->_write_image(%options,
+        Layout => $FinalLayout,
+        rh_sources_info => \%global_sources_info,
+    );
+}
+
+=head2 _compose_sprite_without_glue
+
+Compose a layout without glue layout: the previously lay-outed image set
+becomes part of the next image set.
+
+=cut
+
+sub _compose_sprite_without_glue {
+    my $self = shift;
+    my %options = @_;
+
+    my %global_sources_info;
+
+    my @parts = @{$options{parts}};
+
+    my $LayoutOfLayouts;
+
+    my $i = 0;
+
+    for my $rh_part (@parts) {
+        $i++;
+        
+        # gather information about images in the current part
+        my $rh_sources_info = $self->_ensure_sources_info(%$rh_part);
+
+        # keep composing the global sources_info structure
+        # as we find new images... we will need this later
+        # when we actually write the image.
+        for my $key (keys %$rh_sources_info) {
+            $global_sources_info{$key} = $rh_sources_info->{$key};
+        }
+
+        if (!defined $LayoutOfLayouts) {
+            # we keep the first layout
+            $LayoutOfLayouts = $self->_ensure_layout(%$rh_part,
+                rh_sources_info => $rh_sources_info
+            );
+        }
+        else {
+            # tweak the $rh_sources_info to include a new
+            # fake image (the previously created layout)
+            my $max_id = max keys %$rh_sources_info;
+            my $fake_img_id = $self->_get_image_id();
+            $rh_sources_info->{$fake_img_id} = {
+                name => 'FakeImage' . $i,
+                pathname => "/fake/path_$i",
+                parentdir => "/fake",
+                width => $LayoutOfLayouts->width,
+                height => $LayoutOfLayouts->height,
+                first_pixel_x => 0,
+                first_pixel_y => 0,
+            };
+
+            # we merge down this layout with the first
+            # one, but first we must fix it, as it may
+            # have been moved during this second
+            # iteration.
+            my $Layout = $self->_ensure_layout(%$rh_part,
+                rh_sources_info => $rh_sources_info
+            );
+
+            # where was LayoutOfLayout positioned?
+            my ($lol_x, $lol_y) = $Layout->get_item_coord($fake_img_id);
+
+            # fix previous layout
+            $LayoutOfLayouts->move_items($lol_x, $lol_y);
+
+            # now remove it from $Layout and merge down!
+            $Layout->delete_item($fake_img_id);
+            $LayoutOfLayouts->merge_with($Layout);
+
+            # fix the width that doesn't get updated with
+            # the new layout...
+            $LayoutOfLayouts->{width} = $Layout->width();
+            $LayoutOfLayouts->{height} = $Layout->height();
+        }
+    }
+
+    # draw it all!
+    return $self->_write_image(%options,
+        Layout => $LayoutOfLayouts,
+        rh_sources_info => \%global_sources_info
+    );
+}
+
 
 =head2 _generate_color_histogram
 

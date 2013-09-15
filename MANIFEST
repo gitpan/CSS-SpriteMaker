@@ -1,25 +1,18 @@
 Build.PL
 Changes
-composite.png
-composite2.png
-composite3.png
-fixed.png
 lib/CSS/SpriteMaker.pm
 lib/CSS/SpriteMaker/Layout.pm
 lib/CSS/SpriteMaker/Layout/DirectoryBased.pm
 lib/CSS/SpriteMaker/Layout/FixedDimension.pm
 lib/CSS/SpriteMaker/Layout/Packed.pm
 lib/CSS/SpriteMaker/Layout/Packed/Node.pm
-make_all.sh
-Makefile
 Makefile.old
 Makefile.PL
 MANIFEST			This list of files
 MANIFEST.SKIP
 META.json
 META.yml
-pm_to_blib
-quick_test_dont_commit.pl
+quick_test.png
 README
 sample_icons/apple.png
 sample_icons/banknote.png
@@ -70,8 +63,6 @@ sample_icons/vallet.png
 sample_icons/video.png
 sample_icons/vynil.png
 sample_icons/world.png
-sample_icons2/apple.png
-sample_icons3/apple.png
 t/00-load.t
 t/01-make.t
 t/02-_locate_image_files.t
