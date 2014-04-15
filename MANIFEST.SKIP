@@ -9,8 +9,6 @@
 ^MANIFEST.bak$
 ^Build$
 ^CSS\-SpriteMaker.*.tar.gz$
+^./*.png$
 ^quick_test_dont_commit.pl$
 ^make_all.sh$
-^sample_icons2
-^sample_icons3
-^[a-z0-9A-Z]+[.]png$
