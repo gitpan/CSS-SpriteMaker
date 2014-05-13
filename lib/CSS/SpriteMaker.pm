@@ -22,11 +22,11 @@ CSS::SpriteMaker - Combine several images into a single CSS sprite
 
 =head1 VERSION
 
-Version 0.08
+Version 0.09
 
 =cut
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 
 =head1 SYNOPSIS
@@ -36,14 +36,25 @@ our $VERSION = '0.08';
     my $SpriteMaker = CSS::SpriteMaker->new(
         verbose => 1, # optional
 
-        # if provided will replace the default way of creating css classnames
-        # out of image filenames.
+        #
+        # Options that impact the lifecycle of css class name generation
+        #
+        # if provided will replace the default logic for creating css classnames
+        # out of image filenames. This filename-to-classname is the FIRST step
+        # of css classnames creation. It's safe to return invalid css characters
+        # in this subroutine. They will be cleaned up internally.
         #
         rc_filename_to_classname => sub { my $filename = shift; ... } # optional
 
-        # this callback gets called after the css class name for an image is
-        # generated. It is the latest possible moment at which you can modify
-        # the resulting css class name (e.g., add a prefix to it).
+        # ... cleaning stage happens (all non css safe characters are removed)
+
+        # This adds a prefix to all the css class names. This is called after
+        # the cleaning stage internally. Don't mess with invalid CSS characters!
+        #
+        css_class_prefix => 'myicon-',
+
+        # This is the last step. Change here whatever part of the final css
+        # class name.
         #
         rc_override_classname => sub { my $css_class = shift; ... } # optional
     );
@@ -126,6 +137,8 @@ The object can be initialised as follows:
     
     my $SpriteMaker = CSS::SpriteMaker->new({
         rc_filename_to_classname => sub { my $filename = shift; ... }, # optional
+        css_class_prefix => 'myicon-',                              # optional
+        rc_override_classname => sub { my $css_class = shift; ... } # optional
         source_dir => '/tmp/test/images',       # optional
         target_file => '/tmp/test/mysprite.png' # optional
         remove_source_padding => 1, # optional
@@ -140,7 +153,9 @@ Default values are set to:
 
 =item verbose : false,
 
-=item format  : png
+=item format  : png,
+
+=item css_class_prefix : ''
 
 =back
 
@@ -159,8 +174,10 @@ sub new {
     $opts{verbose}               //= 0;
     $opts{format}                //= 'png';
     $opts{layout_name}           //= 'Packed';
+    $opts{css_class_prefix}      //= '';
     
     my $self = {
+        css_class_prefix => $opts{css_class_prefix},
         source_images => $opts{source_images},
         source_dir => $opts{source_dir},
         target_file => $opts{target_file},
@@ -192,28 +209,28 @@ Compose many sprite layouts into one sprite. This is done by applying
 individual layout separately, then merging the final result together using a
 glue layout.
 
-my $is_error = $SpriteMaker->compose_sprite (
-    parts => [
-        { source_images => ['some/file.png', 'path/to/some_directory'],
-          layout_name => 'Packed',
-        },
-        { source_images => ['path/to/some_directory'],
-          layout => { 
-              name => 'DirectoryBased',
-          }
-          include_in_css => 0,        # optional
-          remove_source_padding => 1, # optional (defaults to 0)
-        },
-    ],
-    # arrange the previous two layout using a glue layout
-    layout => {
-        name => 'FixedDimension',
-        dimension => 'horizontal',
-        n => 2
-    }
-    target_file => 'sample_sprite.png',
-    format => 'png8', # optional, default is png
-);
+    my $is_error = $SpriteMaker->compose_sprite (
+        parts => [
+            { source_images => ['some/file.png', 'path/to/some_directory'],
+              layout_name => 'Packed',
+            },
+            { source_images => ['path/to/some_directory'],
+              layout => { 
+                  name => 'DirectoryBased',
+              }
+              include_in_css => 0,        # optional
+              remove_source_padding => 1, # optional (defaults to 0)
+            },
+        ],
+        # arrange the previous two layout using a glue layout
+        layout => {
+            name => 'FixedDimension',
+            dimension => 'horizontal',
+            n => 2
+        }
+        target_file => 'sample_sprite.png',
+        format => 'png8', # optional, default is png
+    );
 
 Note the optional include_in_css option, which allows to exclude a group of
 images from the CSS (still including them in the resulting image).
@@ -237,14 +254,14 @@ sub compose_sprite {
 Creates the sprite file out of the specifed image files or directories, and
 according to the given layout name.
 
-my $is_error = $SpriteMaker->make_sprite(
-    source_images => ['some/file.png', path/to/some_directory],
-    target_file => 'sample_sprite.png',
-    layout_name => 'Packed',
+    my $is_error = $SpriteMaker->make_sprite(
+        source_images => ['some/file.png', path/to/some_directory],
+        target_file => 'sample_sprite.png',
+        layout_name => 'Packed',
 
-    # all imagemagick supported formats
-    format => 'png8', # optional, default is png
-);
+        # all imagemagick supported formats
+        format => 'png8', # optional, default is png
+    );
 
 returns true if an error occurred during the procedure.
 
@@ -661,14 +678,14 @@ each image file.
 
 The returned arrayref looks like:
 
-[   # pathnames of the first image to follow
-    {
-        name => 'image.png',
-        pathname => '/complete/path/to/image.png',
-        parentdir => '/complete/path/to',
-    },
-    ...
-]
+    [   # pathnames of the first image to follow
+        {
+            name => 'image.png',
+            pathname => '/complete/path/to/image.png',
+            parentdir => '/complete/path/to',
+        },
+        ...
+    ]
 
 Dies if the given directory is empty or doesn't exist.
 
@@ -805,6 +822,11 @@ sub _generate_css_class_name {
     # remove initial dashes if any
     $css_class =~ s/\A-+//g;
 
+    # add prefix if it was requested
+    if (defined $self->{css_class_prefix}) {
+        $css_class = $self->{css_class_prefix} . $css_class;
+    }
+
     # allow change (e.g., add prefix)
     if (defined $rc_override_classname) {
         $css_class = $rc_override_classname->($css_class);
@@ -931,6 +953,7 @@ Parameters in %options (see code) that allow us to obtain a $Layout object are:
 
 - layout: a CSS::SpriteMaker::Layout object already;
 - layout: can also be a hashref like 
+
     {
         name => 'LayoutName',
         options => {
@@ -938,6 +961,7 @@ Parameters in %options (see code) that allow us to obtain a $Layout object are:
             ...
         }
     }
+
 - layout_name: the name of a CSS::SpriteMaker::Layout object.
 
 If none of the above parameters have been found in input options, the cache is
