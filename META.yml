@@ -28,10 +28,10 @@ name: CSS-SpriteMaker
 provides:
   CSS::SpriteMaker:
     file: lib/CSS/SpriteMaker.pm
-    version: 0.09
+    version: 0.10
   CSS::SpriteMaker::Layout:
     file: lib/CSS/SpriteMaker/Layout.pm
-    version: 0.02
+    version: 0.03
   CSS::SpriteMaker::Layout::DirectoryBased:
     file: lib/CSS/SpriteMaker/Layout/DirectoryBased.pm
     version: 0.01
@@ -52,4 +52,4 @@ requires:
   perl: 5.006
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.09
+version: 0.10
