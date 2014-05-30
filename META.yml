@@ -19,7 +19,7 @@ build_requires:
 configure_requires:
   Module::Build: 0.38
 dynamic_config: 1
-generated_by: 'Module::Build version 0.38, CPAN::Meta::Converter version 2.110440'
+generated_by: 'Module::Build version 0.3901, CPAN::Meta::Converter version 2.120921'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -28,7 +28,7 @@ name: CSS-SpriteMaker
 provides:
   CSS::SpriteMaker:
     file: lib/CSS/SpriteMaker.pm
-    version: 0.13
+    version: 0.14
   CSS::SpriteMaker::Layout:
     file: lib/CSS/SpriteMaker/Layout.pm
     version: 0.03
@@ -52,4 +52,4 @@ requires:
   perl: 5.006
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.13
+version: 0.14
