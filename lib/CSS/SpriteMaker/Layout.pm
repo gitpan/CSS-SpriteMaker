@@ -16,11 +16,11 @@ instead.
 
 =head1 VERSION
 
-Version 0.02
+Version 0.04
 
 =cut
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 =head2 _layout_items
 
@@ -179,7 +179,7 @@ Returns the id of each item into an array.
 
 sub get_item_ids {
     my $self = shift;
-    return keys %{$self->{items}};
+    return sort { $a <=> $b } keys %{$self->{items}};
 }
 
 =head2 get_layout_ascii_string

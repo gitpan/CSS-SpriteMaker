@@ -42,11 +42,11 @@ for this layout to produce a result:
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head2 new
 
@@ -91,6 +91,8 @@ sub _layout_items {
             $rh_items_info->{$b}{height}
                 <=>
             $rh_items_info->{$a}{height}
+
+            || $a <=> $b
         }
         keys %$rh_items_info;
 
